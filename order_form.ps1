@@ -168,16 +168,28 @@ class Forms {
 
 
 class RegexHandler {
-    [string] $customerAddress
-    [string] $customerContact
-    [string] $salesAddress
-    [string] $engagementManager
+    [System.Data.DataTable] $coverPage_Table
 
-    RegexHandler([string] $customerAddress, [string] $customerContact, [string] $salesAddress, [string] $engagementManager) {
-        $this.customerAddress = $customerAddress
-        $this.customerContact = $customerContact
-        $this.salesAddress = $salesAddress
-        $this.engagementManager = $engagementManager
+    RegexHandler([System.Data.DataTable] $coverPage_Table) {
+        $this.coverPageTable = $coverPage_Table
+    }
+
+    [string] GetCustomerAddress() {
+        $this.customerAddress = $this.coverPageTable.Rows[2][0].ToString()
+        return $this.customerAddress #is it better to use $this.variable or just $variable within a class?
+    }
+
+    [string] GetCustomerContact() {
+        $customerContact = $this.coverPageTable.Rows[4][0].ToString()
+        return $customerContact
+    }
+
+    [string] GetSalesAddress() {
+        
+    }
+
+    [string] GetEngagementManager() {
+        
     }
 
     [string] GetCustomerStreet() {
@@ -258,8 +270,21 @@ class RegexHandler {
     [string] GetEngagementManagerEmail() {
         $emailPattern = "(?("")(""[^""]+?""@)|(([0-9a-zA-Z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-zA-Z])@))" + "(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-zA-Z][-0-9a-zA-Z]*[0-9a-zA-Z]*\.)+[a-zA-Z0-9][\-a-zA-Z0-9]{0,22}[a-zA-Z0-9]))"
         return [System.Text.RegularExpressions.Regex]::Match($this.engagementManager, $emailPattern).Value.Trim()
+
+
+    [string] GetCreditCheckAuth([string] $out_mailBody) {
+        return [System.Text.RegularExpressions.Regex]::Match($out_mailBody, "Authorization Number:\s*([A-Za-z]\d+)").Value.Trim()
     }
-}
+    
+    [string] GetCreditCheckProcess([string] $out_mailBody) {
+        return [System.Text.RegularExpressions.Regex]::Match($out_mailBody, "(Credit Process Number:[\s\S]*?)Agreement Type:").Value.Trim()
+        }
+    
+    [string] GetCreditExpiry([string] $out_mailBody) {
+        return [System.Text.RegularExpressions.Regex]::Match($out_mailBody, "valid until:\s*(\d{2}/\d{2}/\d{4})").Value.Trim()
+        }
+    }
+
 
 # Example usage:
 $coverPage_Table = New-Object System.Data.DataTable
